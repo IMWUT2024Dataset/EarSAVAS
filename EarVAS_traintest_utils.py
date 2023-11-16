@@ -247,7 +247,6 @@ def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=Non
 
         audio_output = torch.cat(A_predictions)
         target = torch.cat(A_targets)
-        print(audio_output.shape, target.shape)
         loss = np.mean(A_loss)
         stats, confusion_matrix = calculate_stats(audio_output, target)
 
