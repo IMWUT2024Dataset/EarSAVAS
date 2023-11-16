@@ -27,8 +27,8 @@ def main(cfg):
     if not os.path.exists(dataset_dir):
         raise ValueError("The dataset directory does not exist, please run 1-prep_data.py and 2-mel_converter.py first")
 
-    audio_dataset_path = f'ad_{audio_sr}_{snippet_duration}_disk2.pkl'
-    imu_dataset_path = f'id_{imu_sr}_{snippet_duration}_disk2.pkl'
+    audio_dataset_path = f'ad_{audio_sr}_{snippet_duration}.pkl'
+    imu_dataset_path = f'id_{imu_sr}_{snippet_duration}.pkl'
     audio_dataset_path = os.path.join(dataset_dir, audio_dataset_path)
     imu_dataset_path = os.path.join(dataset_dir, imu_dataset_path)
 
