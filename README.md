@@ -19,22 +19,22 @@ The EarSAVAS dataset can be downloaded from [Kaggle](https://www.kaggle.com/data
 ```
 data/
 │
-├── user_6_1                 					# All the data collected from the earables worn by one specific user
-│   ├── audio/              	 				# All the audio data of one specific user
-│   │     ├── Cough										# All the audio data of cough events originated from user_6_1
+├── user_6_1    # All the data collected from the earables worn by one specific user
+│   ├── audio/    # All the audio data of one specific user
+│   │     ├── Cough		 # All the audio data of cough events originated from user_6_1
 │   │     │     ├── user_6_1_1.wav 		# Audio data file, the numbers behind user_6_1_ hold no specific meaning
 │   │     │     ├── user_6_1_3.wav
-│   │     ├── Speech									# All the audio data of speech events originated from user_6_1
-│   │     ├── Cough_non_subject				# Cough events originated from user_6_2 but collected by earables of 6_1
-│   │     ├── Speech_non_subject			# Speech events originated from user_6_2 but collected by earables of 6_1
+│   │     ├── Speech		# All the audio data of speech events originated from user_6_1
+│   │     ├── Cough_non_subject		 # Cough events originated from user_6_2 but collected by earables of 6_1
+│   │     ├── Speech_non_subject		# Speech events originated from user_6_2 but collected by earables of 6_1
 │   │     ├── ...
-│   └── imu/              	 					# All the motion data of one specific user
-│         ├── Cough										# All the motion data of cough events originated from user_6_2
+│   └── imu/    # All the motion data of one specific user
+│         ├── Cough		 # All the motion data of cough events originated from user_6_2
 │         │     ├── user_6_1_1.pkl 		# IMU data file, the numbers is used to find the corresponding audio file
 │         │     ├── user_6_1_3.pkl
-│         ├── Speech									# All the motion data of speech events originated from user_6_1
-│         ├── Cough_non_subject				# All the motion data of collected while user_6_2 coughs
-│         ├── Speech_non_subject			# All the motion data of collected while user_6_2 speech
+│         ├── Speech		# All the motion data of speech events originated from user_6_1
+│         ├── Cough_non_subject		 # All the motion data of collected while user_6_2 coughs
+│         ├── Speech_non_subject		# All the motion data of collected while user_6_2 speech
 │         ├── ...											
 ├── user_15_1
 ├── user_14_1  
