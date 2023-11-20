@@ -70,7 +70,11 @@ python3 prep_data.py Dataset.raw_data_dir=absolute_path_of_data Dataset.dataset_
 
 
 
-**Step 3.** Run the evaluation of our best models of EarVAS series models.
+**Step 3.** Download the pretrained models from [Google Drive](https://drive.google.com/drive/folders/1O0mGU9ziRWii0kGJFmhratkw9e6lsJry)
+
+
+
+**Step 4.** Run the evaluation of our best models of EarVAS series models.
 
 ```
 python3 EarVAS_evaluation.py Dataset.dataset_dir=absolute_path_of_where_you_store_dataset_files_in_step_2 Model.exp_dir=absolute_path_where_you_download_the_pretrained_models Model.task=$task Model.device=$device
