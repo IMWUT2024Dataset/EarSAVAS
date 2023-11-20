@@ -8,7 +8,7 @@ EarSAVAS is a publicly available multi-modal dataset crafted for subject-aware h
 
 Now only the evaluation dataset of EarSAVAS is available, consisting of the data from 8 users. We also release the pre-trained models we obtained to facilitate the evaluation of EarVAS series models. We will release the whole dataset once our dataset paper is accepted by the IMWUT 2024.
 
- 
+Since we only propose the evaluation dataset, researchers can conduct evaluations on our pre-trained EarVAS series models we released in this respiratory. 
 
 ### Download EarSAVAS
 
@@ -33,8 +33,8 @@ data/
 │         │     ├── user_6_1_1.pkl 		# IMU data file, the numbers is used to find the corresponding audio file
 │         │     ├── user_6_1_3.pkl
 │         ├── Speech		# All the motion data of speech events originated from user_6_1
-│         ├── Cough_non_subject		 # All the motion data of collected while user_6_2 coughs
-│         ├── Speech_non_subject		# All the motion data of collected while user_6_2 speech
+│         ├── Cough_non_subject		 # All the motion data collected while user_6_2 coughs
+│         ├── Speech_non_subject		# All the motion data collected while user_6_2 speech
 │         ├── ...											
 ├── user_15_1
 ├── user_14_1  
@@ -47,11 +47,11 @@ data/
 
 
 
-### Run EarVAS benchmark model locally
+### Evaluate the pertained EarVAS benchmark model locally
 
 ---
 
-**Step 1. ** Clone or download this repository and set it as the working directory, create a virtual environment, and install the dependencies.
+**Step 1.** Clone or download this repository and set it as the working directory, create a virtual environment, and install the dependencies.
 
 ```
 cd EarSAVAS/
@@ -73,9 +73,9 @@ python3 prep_data.py Dataset.raw_data_dir=absolute_path_of_data Dataset.dataset_
 **Step 3.** Run the evaluation of our best models of EarVAS series models.
 
 ```
-python3 EarVAS_evaluation.py Dataset.dataset_dir=absolute_path_consistent_with_the_same_above Model.exp_dir=. Model.task=$task
+python3 EarVAS_evaluation.py Dataset.dataset_dir=absolute_path_consistent_with_the_same_above Model.exp_dir=. Model.task=$task Model.device=$device
 ```
 
 The model task can be only selected from [two_channel_audio_and_imu, two_channel_audio, feedforward_audio, feedback_audio, imu_only, feedback_audio_and_imu, feedforward_audio_and_imu]
 
-Since we only propose the evaluation dataset, researchers can conduct evaluations on our pre-trained EarVAS series models we released in this respiratory.
+The model device can be only selected from [cpu, cuda]. **We recommend evaluating our pre-trained models on the CPU. If the device is selected as cuda, then please ensure that the version of your CUDA is 12.2.** Otherwise, the results will differ from those reported in the original paper. 

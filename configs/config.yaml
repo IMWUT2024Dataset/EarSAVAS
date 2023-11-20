@@ -1,12 +1,12 @@
 Dataset:
   seed: 0
-  audio_sr: 16000
-  imu_sr: 100
-  duration: 1
-  num_mel_bins: 128
-  target_length: 128
-  freqm: 48
-  timem: 48
+  audio_sr: 16000 # audio sampling rate
+  imu_sr: 100 # imu sampling rate
+  duration: 1 # second
+  num_mel_bins: 128 # number of mel bins
+  target_length: 128 # number of frames
+  freqm: 48 # frequency masking during training process
+  timem: 48 # time masking during training process
   raw_data_dir: /data6-HDD-USB-5T/cut_data # data_path where you unzip our data
   dataset_dir: /data6-HDD-USB-5T/dataset # data_path where you save the dataset
   label_list: 
@@ -76,7 +76,8 @@ Dataset:
     - 'user_3_1'
 
 Model:
-  task: ???
+  task: ??? # two_channel_audio_and_imu/two_channel_audio/feedforward_audio/feedback_audio/imu_only/feedback_audio_and_imu/feedforward_audio_and_imu
+  device: ??? # cuda/cpu
   lr: 0.0001
   num_workers: 8
   num_epochs: 50

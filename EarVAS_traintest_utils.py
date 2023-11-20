@@ -1,6 +1,7 @@
 import os
 import time
 import torch
+import joblib
 import datetime
 import numpy as np
 from utilities.util import *
@@ -8,7 +9,11 @@ from EarVAS_models import FocalLossMulti
 from utilities.EarVAS_stat_calcu import *
 
 def train(audio_model, train_loader, test_loader, cfg):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = cfg.Model.device
+    if device == 'cuda':
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    else:
+        device = torch.device("cpu")
     print(device)
     torch.set_grad_enabled(True)
     # Initialize all of the statistics we want to keep track of
@@ -25,7 +30,7 @@ def train(audio_model, train_loader, test_loader, cfg):
 
     exp_dir = Model_config.exp_dir
 
-    if not isinstance(audio_model, nn.DataParallel):
+    if not isinstance(audio_model, nn.DataParallel) and device == 'cuda':
         audio_model = nn.DataParallel(audio_model)
 
     audio_model = audio_model.to(device)
@@ -142,9 +147,14 @@ def train(audio_model, train_loader, test_loader, cfg):
         per_sample_dnn_time.reset()
 
 def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=None, label_dict=None):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = cfg.Model.device
+    if device == 'cuda':
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    else:
+        device = torch.device("cpu")
+
     batch_time = AverageMeter()
-    if not isinstance(audio_model, nn.DataParallel):
+    if not isinstance(audio_model, nn.DataParallel) and device == 'cuda':
         audio_model = nn.DataParallel(audio_model)
     audio_model = audio_model.to(device)
     audio_model.eval()
@@ -153,6 +163,10 @@ def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=Non
     A_predictions = []
     A_targets = []
     A_loss = []
+
+    tmp_results = {}
+    
+    tmp_results['model_weights'] = audio_model.state_dict()
 
     if detail_analysis:
         exp_dir = cfg.Model.exp_dir
@@ -190,6 +204,13 @@ def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=Non
                 audio_output = audio_model(audio_input, imu_input)
             
             predictions = nn.Softmax(dim=1)(audio_output).to('cpu').detach()
+            
+            if 'audio_data' not in tmp_results:
+                tmp_results['audio_data'] = audio_input.cpu().numpy()
+                tmp_results['audio_output'] = audio_output.cpu().numpy()
+                tmp_results['labels'] = labels.cpu().numpy()
+                tmp_results['predictions'] = predictions.cpu().numpy()
+            
             A_predictions.append(predictions)
             A_targets.append(labels)
 
@@ -249,5 +270,7 @@ def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=Non
         target = torch.cat(A_targets)
         loss = np.mean(A_loss)
         stats, confusion_matrix = calculate_stats(audio_output, target)
+
+    joblib.dump(tmp_results, './tmp_results.pkl')
 
     return stats, loss, confusion_matrix

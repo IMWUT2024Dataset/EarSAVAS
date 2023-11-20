@@ -45,6 +45,8 @@ def main(cfg):
     
     raw_label_list = Dataset_config.label_list
     task = Model_config.task
+    device = Model_config.device
+
     if task == 'SWITest_without_non_subjects':
         raw_label_list = [item for item in raw_label_list if 'non_subject' not in item]
 
@@ -91,9 +93,18 @@ def main(cfg):
         raise ValueError('Model Unrecognized')
 
     # test on the test set and sub-test set, model selected on the validation set
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if device == 'cuda':
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    else:
+        device = torch.device("cpu")
+
     sd = torch.load(exp_dir + f'/models/best_audio_model_{task}.pth', map_location=device)
-    audio_model = torch.nn.DataParallel(audio_model)
+
+    if device == 'cpu':
+        sd = {k.replace('module.', ''): v for k, v in sd.items()}
+    else:
+        audio_model = torch.nn.DataParallel(audio_model)
+    
     audio_model.load_state_dict(sd)
 
     if task != 'SWITest_without_non_subjects':
