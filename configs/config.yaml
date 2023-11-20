@@ -76,8 +76,8 @@ Dataset:
     - 'user_3_1'
 
 Model:
-  task: ??? # two_channel_audio_and_imu/two_channel_audio/feedforward_audio/feedback_audio/imu_only/feedback_audio_and_imu/feedforward_audio_and_imu
-  device: ??? # cuda/cpu
+  task: ??? # select from two_channel_audio_and_imu/two_channel_audio/feedforward_audio/feedback_audio/imu_only/feedback_audio_and_imu/feedforward_audio_and_imu
+  device: ??? # select from cuda/cpu
   lr: 0.0001
   num_workers: 8
   num_epochs: 50
