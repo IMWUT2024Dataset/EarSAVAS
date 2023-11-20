@@ -73,7 +73,7 @@ python3 prep_data.py Dataset.raw_data_dir=absolute_path_of_data Dataset.dataset_
 **Step 3.** Run the evaluation of our best models of EarVAS series models.
 
 ```
-python3 EarVAS_evaluation.py Dataset.dataset_dir=absolute_path_consistent_with_the_same_above Model.exp_dir=. Model.task=$task Model.device=$device
+python3 EarVAS_evaluation.py Dataset.dataset_dir=absolute_path_of_where_you_store_dataset_files_in_step_2 Model.exp_dir=absolute_path_where_you_download_the_pretrained_models Model.task=$task Model.device=$device
 ```
 
 The model task can be only selected from [two_channel_audio_and_imu, two_channel_audio, feedforward_audio, feedback_audio, imu_only, feedback_audio_and_imu, feedforward_audio_and_imu]

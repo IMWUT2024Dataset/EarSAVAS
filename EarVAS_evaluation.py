@@ -98,7 +98,7 @@ def main(cfg):
     else:
         device = torch.device("cpu")
 
-    sd = torch.load(exp_dir + f'/models/best_audio_model_{task}.pth', map_location=device)
+    sd = torch.load(exp_dir + f'/best_audio_model_{task}.pth', map_location=device)
 
     if device == 'cpu':
         sd = {k.replace('module.', ''): v for k, v in sd.items()}
