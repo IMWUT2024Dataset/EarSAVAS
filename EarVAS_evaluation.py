@@ -100,7 +100,7 @@ def main(cfg):
 
     sd = torch.load(exp_dir + f'/best_audio_model_{task}.pth', map_location=device)
 
-    if device == 'cpu':
+    if device.type == 'cpu':
         sd = {k.replace('module.', ''): v for k, v in sd.items()}
     else:
         audio_model = torch.nn.DataParallel(audio_model)

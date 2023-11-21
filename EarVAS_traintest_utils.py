@@ -30,7 +30,7 @@ def train(audio_model, train_loader, test_loader, cfg):
 
     exp_dir = Model_config.exp_dir
 
-    if not isinstance(audio_model, nn.DataParallel) and device == 'cuda':
+    if not isinstance(audio_model, nn.DataParallel) and device.type == 'cuda':
         audio_model = nn.DataParallel(audio_model)
 
     audio_model = audio_model.to(device)
@@ -154,7 +154,7 @@ def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=Non
         device = torch.device("cpu")
 
     batch_time = AverageMeter()
-    if not isinstance(audio_model, nn.DataParallel) and device == 'cuda':
+    if not isinstance(audio_model, nn.DataParallel) and device.type == 'cuda':
         audio_model = nn.DataParallel(audio_model)
     audio_model = audio_model.to(device)
     audio_model.eval()
