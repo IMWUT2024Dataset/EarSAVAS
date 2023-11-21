@@ -51,7 +51,7 @@ data/
 
 ---
 
-**Step 1.** Clone or download this repository and set it as the working directory, create a virtual environment, and install the dependencies.
+**Step 1.** Build a conda environment where the **Python version is 3.8**, then clone and download this repository and set it as the working directory, create a virtual environment, and install the dependencies.
 
 ```
 cd EarSAVAS/
@@ -70,7 +70,7 @@ python3 prep_data.py Dataset.raw_data_dir=absolute_path_of_data Dataset.dataset_
 
 
 
-**Step 3.** Download the pretrained models from [Google Drive](https://drive.google.com/drive/folders/1O0mGU9ziRWii0kGJFmhratkw9e6lsJry)
+**Step 3.** Download the pre-trained models from [Google Drive](https://drive.google.com/drive/folders/1O0mGU9ziRWii0kGJFmhratkw9e6lsJry)
 
 
 
