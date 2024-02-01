@@ -39,10 +39,9 @@ poetry install --no-root
 7. Download the pre-trained model from and save them somewhere. Change the model_dir in test.py to where you save the pre-trained models.
 8. run the test.py and get the results in the current directory as follows
 
---- BEATs
-
-​		--- feedforward_audio.txt
-
-​		--- feedback_audio.txt
-
-​		--- two_channel_audio.txt
+```
+BEATs_on_EarSAVAS/
+├── two_channel_audio_False.txt
+├── feedback_audio_False.txt
+└── feedforward_audio_False.txt
+```
