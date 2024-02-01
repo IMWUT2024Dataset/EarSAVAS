@@ -7,8 +7,8 @@ Dataset:
   target_length: 128 # number of frames
   freqm: 48 # frequency masking during training process
   timem: 48 # time masking during training process
-  raw_data_dir: /data6-HDD-USB-5T/cut_data # data_path where you unzip our data
-  dataset_dir: /data6-HDD-USB-5T/dataset # data_path where you save the dataset
+  raw_data_dir: cut_data # data_path where you unzip our data
+  dataset_dir: dataset # data_path where you save the dataset
   label_list: 
     - 'Blow_Nose'
     - 'Throat_Clear'
@@ -78,10 +78,13 @@ Dataset:
 Model:
   task: ??? # select from two_channel_audio_and_imu/two_channel_audio/feedforward_audio/feedback_audio/imu_only/feedback_audio_and_imu/feedforward_audio_and_imu
   device: ??? # select from cuda/cpu
-  lr: 0.0001
+  lr: 1e-4
   num_workers: 8
   num_epochs: 50
   batch_size: 128
   n_print_steps: 100
   weight_decay: 5e-7
-  exp_dir: /home/vocalsound/src_EarVAS/ # path where you save the metrics
+  single_modality_feature_size: 256
+  exp_dir: src_EarVAS/ # path where you save the metrics
+  training_subject_ratio: ???
+  samosa: ??? # select from True/False

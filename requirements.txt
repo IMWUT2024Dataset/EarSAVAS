@@ -14,3 +14,4 @@ wget==3.2
 zipp==3.4.1
 efficientnet-lite-pytorch==0.1.0
 efficientnet-pytorch==0.7.0
+pycm==4.0

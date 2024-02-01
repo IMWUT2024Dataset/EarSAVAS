@@ -27,7 +27,10 @@ def main(cfg):
     if not os.path.exists(dataset_dir):
         raise ValueError("The dataset directory does not exist, please run 1-prep_data.py and 2-mel_converter.py first")
 
-    audio_dataset_path = f'ad_{audio_sr}_{snippet_duration}.pkl'
+    if Model_config.samosa:
+        audio_dataset_path = f'ad_{audio_sr}_{snippet_duration}_samosa.pkl'
+    else:
+        audio_dataset_path = f'ad_{audio_sr}_{snippet_duration}.pkl'
     imu_dataset_path = f'id_{imu_sr}_{snippet_duration}.pkl'
     audio_dataset_path = os.path.join(dataset_dir, audio_dataset_path)
     imu_dataset_path = os.path.join(dataset_dir, imu_dataset_path)
@@ -46,6 +49,7 @@ def main(cfg):
     raw_label_list = Dataset_config.label_list
     task = Model_config.task
     device = Model_config.device
+    samosa = Model_config.samosa
 
     if task == 'SWITest_without_non_subjects':
         raw_label_list = [item for item in raw_label_list if 'non_subject' not in item]
@@ -62,7 +66,7 @@ def main(cfg):
     if task == 'SWITest_without_non_subjects' or task == 'SWITest_with_non_subjects':
         testing_dataset = EarVAS_dataloaders.SWITestDataset(audio_data, testing_user_list, raw_label_dict, task=task, audio_conf=val_audio_conf)
     else:
-        testing_dataset = EarVAS_dataloaders.EarSAVAS_Dataset(audio_data, imu_data, testing_user_list, raw_label_dict, audio_conf=val_audio_conf)
+        testing_dataset = EarVAS_dataloaders.EarSAVAS_Dataset(audio_data, imu_data, testing_user_list, raw_label_dict, audio_conf=val_audio_conf, samosa=Model_config.samosa)
 
     test_loader = torch.utils.data.DataLoader(testing_dataset, batch_size=128, shuffle=False, num_workers=num_workers, pin_memory=True)
 
@@ -73,20 +77,22 @@ def main(cfg):
     num_classes = len([item for item in label_list if 'non_subject' not in item])
     print(num_classes)
 
+    feature_size = Model_config.single_modality_feature_size
+
     if task == 'two_channel_audio_and_imu':
-        audio_model = EarVAS_models.EarVAS(num_classes, fusion=True, audio_channel='BiChannel')
+        audio_model = EarVAS_models.EarVAS(num_classes, fusion=True, audio_channel='BiChannel', feature_size=feature_size, samosa=samosa)
     elif task == 'two_channel_audio':
-        audio_model = EarVAS_models.EarVAS(num_classes, fusion=False, audio_channel='BiChannel')
+        audio_model = EarVAS_models.EarVAS(num_classes, fusion=False, audio_channel='BiChannel', feature_size=feature_size, samosa=samosa)
     elif task == 'feedforward_audio':
-        audio_model = EarVAS_models.EarVAS(num_classes, fusion=False, audio_channel='FeedForward')
+        audio_model = EarVAS_models.EarVAS(num_classes, fusion=False, audio_channel='FeedForward', feature_size=feature_size, samosa=samosa)
     elif task == 'feedback_audio':
-        audio_model = EarVAS_models.EarVAS(num_classes, fusion=False, audio_channel='FeedBack')
+        audio_model = EarVAS_models.EarVAS(num_classes, fusion=False, audio_channel='FeedBack', feature_size=feature_size, samosa=samosa)
     elif task == 'imu_only':
-        audio_model = EarVAS_models.EarVAS(num_classes, fusion=False, audio_channel='None')
+        audio_model = EarVAS_models.EarVAS(num_classes, fusion=False, audio_channel='None', feature_size=feature_size, samosa=samosa)
     elif task == 'feedback_audio_and_imu':
-        audio_model = EarVAS_models.EarVAS(num_classes, fusion=True, audio_channel='FeedBack')
+        audio_model = EarVAS_models.EarVAS(num_classes, fusion=True, audio_channel='FeedBack', feature_size=feature_size, samosa=samosa)
     elif task == 'feedforward_audio_and_imu':
-        audio_model = EarVAS_models.EarVAS(num_classes, fusion=True, audio_channel='FeedForward')
+        audio_model = EarVAS_models.EarVAS(num_classes, fusion=True, audio_channel='FeedForward', feature_size=feature_size, samosa=samosa)
     elif task == 'SWITest_without_non_subjects' or task == 'SWITest_with_non_subjects':
         audio_model = EarVAS_models.EffNetMean(num_classes)
     else:
@@ -98,7 +104,9 @@ def main(cfg):
     else:
         device = torch.device("cpu")
 
-    sd = torch.load(exp_dir + f'/best_audio_model_{task}.pth', map_location=device)
+    # sd = torch.load(exp_dir + f'models/best_audio_model_{task}_{use_imu_bert_features}_SAMoSA_False_{training_subject_ratio}.pth', map_location=device)
+    sd = torch.load(exp_dir + f'/models/best_audio_model_{task}_SAMoSA_{samosa}.pth', map_location=device)
+    # sd = torch.load(exp_dir + f'/best_audio_model_{task}.pth', map_location=device)
 
     if device.type == 'cpu':
         sd = {k.replace('module.', ''): v for k, v in sd.items()}
@@ -118,7 +126,7 @@ def main(cfg):
     print("test confusion matrix: ")
     print(confusion_matrix)
 
-    with open(exp_dir + f'/confusion_matrix_{task}.txt', 'a') as f:
+    with open(exp_dir + f'/confusion_matrix_{task}_SAMoSA_{samosa}.txt', 'a') as f:
         f.write(f'Validation Confusion Matrix:\n')
         f.write(str(confusion_matrix))
         f.write('\n')

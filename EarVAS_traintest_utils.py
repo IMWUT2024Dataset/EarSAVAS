@@ -3,6 +3,7 @@ import time
 import torch
 import joblib
 import datetime
+from pycm import *
 import numpy as np
 from utilities.util import *
 from EarVAS_models import FocalLossMulti
@@ -23,7 +24,7 @@ def train(audio_model, train_loader, test_loader, cfg):
     per_sample_data_time = AverageMeter()
     loss_meter = AverageMeter()
     per_sample_dnn_time = AverageMeter()
-    global_step, epoch = 0, 0
+    global_step, epoch, best_f1_macro = 0, 0, 0.0
 
     Dataset_config = cfg.Dataset
     Model_config = cfg.Model
@@ -62,7 +63,10 @@ def train(audio_model, train_loader, test_loader, cfg):
             audio_input = data[0]
             B = audio_input.size(0)
             audio_input = audio_input.to(device, non_blocking=True)
-            labels = data[-2].to(device, non_blocking=True) # labels are always second to last item
+            if 'without' in Model_config.task:
+                labels = data[-1].to(device, non_blocking=True) # labels are always second to last item
+            else:
+                labels = data[-2].to(device, non_blocking=True)
 
             data_time.update(time.time() - end_time)
             per_sample_data_time.update((time.time() - end_time) / audio_input.shape[0])
@@ -74,6 +78,7 @@ def train(audio_model, train_loader, test_loader, cfg):
                 imu_input = data[1].to(device, non_blocking=True)
                 audio_output = audio_model(audio_input, imu_input)
 
+            # full subject vocal activity
             loss_fn = FocalLossMulti(alpha = [0.35360856584308326, 0.07880689123104302, 0.13360323641582555, 
                                             0.0894736825693862, 0.1682411125236322, 0.02513590968890248, 
                                             0.10366172702597115, 0.04619501733699732, 0.0012738573651589443], gamma=2)
@@ -110,7 +115,7 @@ def train(audio_model, train_loader, test_loader, cfg):
             global_step += 1
 
         print('start validation')
-        stats, valid_loss, confusion_matrix = validate(audio_model, test_loader, cfg)
+        stats, valid_loss, f1_macro, confusion_matrix = validate(audio_model, test_loader, cfg)
         print('validation finished')
 
         acc = np.mean([stat['acc'] for stat in stats])
@@ -121,14 +126,14 @@ def train(audio_model, train_loader, test_loader, cfg):
         print("confusion_matrix: ", confusion_matrix)
 
         # write the confusion matrix into txt files 
-        with open(exp_dir + f'/confusion_matrix_{Model_config.task}.txt', 'a') as f:
+        with open(exp_dir + f'/confusion_matrix_{Model_config.task}_SAMoSA_{Model_config.samosa}.txt', 'a') as f:
             f.write(f'Validation Confusion Matrix:\n')
             f.write(str(confusion_matrix))
             f.write('\n')
 
-        if acc > best_acc:
-            best_acc = acc
-            torch.save(audio_model.state_dict(), f"{exp_dir}/models/best_audio_model_{Model_config.task}.pth")
+        if f1_macro > best_f1_macro:
+            best_f1_macro = f1_macro
+            torch.save(audio_model.state_dict(), f"{exp_dir}/models/best_audio_model_{Model_config.task}_SAMoSA_{Model_config.samosa}.pth")
 
         scheduler.step()
 
@@ -163,10 +168,6 @@ def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=Non
     A_predictions = []
     A_targets = []
     A_loss = []
-
-    tmp_results = {}
-    
-    tmp_results['model_weights'] = audio_model.state_dict()
 
     if detail_analysis:
         exp_dir = cfg.Model.exp_dir
@@ -204,12 +205,6 @@ def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=Non
                 audio_output = audio_model(audio_input, imu_input)
             
             predictions = nn.Softmax(dim=1)(audio_output).to('cpu').detach()
-            
-            if 'audio_data' not in tmp_results:
-                tmp_results['audio_data'] = audio_input.cpu().numpy()
-                tmp_results['audio_output'] = audio_output.cpu().numpy()
-                tmp_results['labels'] = labels.cpu().numpy()
-                tmp_results['predictions'] = predictions.cpu().numpy()
             
             A_predictions.append(predictions)
             A_targets.append(labels)
@@ -252,7 +247,7 @@ def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=Non
             end = time.time()
 
         if detail_analysis:
-            with open(os.path.join(log_dir, f'{cfg.Model.task}_results.txt'), 'w') as f:
+            with open(os.path.join(log_dir, f'{cfg.Model.task}_SAMoSA_{cfg.Model.samosa}_results.txt'), 'w') as f:
                 f.write(f"fp_label_dict: {fp_label_dict}\n")
                 f.write(f"fn_label_dict: {fn_label_dict}\n")
 
@@ -268,9 +263,11 @@ def validate(audio_model, val_loader, cfg, detail_analysis=False, label_list=Non
 
         audio_output = torch.cat(A_predictions)
         target = torch.cat(A_targets)
+        audio_output_cm = torch.argmax(audio_output, dim=1)
+        target_cm = torch.argmax(target, dim=1)
+        cm = ConfusionMatrix(actual_vector=target_cm.cpu().numpy(), predict_vector=audio_output_cm.cpu().numpy())
+        f1_macro = cm.F1_Macro
         loss = np.mean(A_loss)
         stats, confusion_matrix = calculate_stats(audio_output, target)
 
-    joblib.dump(tmp_results, './tmp_results.pkl')
-
-    return stats, loss, confusion_matrix
+    return stats, loss, f1_macro, confusion_matrix

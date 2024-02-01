@@ -44,7 +44,6 @@ def calculate_stats(output, target):
 
 
         # Accuracy
-        # this is only used for single-label classification such as esc-50, not for multiple label one such as AudioSet
         acc = metrics.accuracy_score(np.argmax(target, 1), np.argmax(output, 1))
 
         # F1

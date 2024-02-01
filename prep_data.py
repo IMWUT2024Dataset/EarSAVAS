@@ -43,8 +43,9 @@ def load_user(user_name, audio_sr, raw_dir):
     for label in audio_labels:
         if os.path.isdir(os.path.join(raw_dir, user_name, 'audio', label)):
             audio_data_label, imu_data_label = load_user_label(user_name, label, audio_sr, raw_dir)
-            audio_data[label] = audio_data_label
-            imu_data[label] = imu_data_label
+            real_label = label.replace('Read', 'Speech').replace('Eat', 'Chewing')
+            audio_data[real_label] = audio_data_label
+            imu_data[real_label] = imu_data_label
 
     return audio_data, imu_data
 
@@ -137,11 +138,10 @@ def main(cfg):
 
     raw_data_dir = Dataset_config.raw_data_dir
     target_dir = Dataset_config.dataset_dir
-    # user_list = Dataset_config.user_list
-    # training_user_list = Dataset_config.training_user_list
-    # validation_user_list = Dataset_config.validation_user_list
-    training_user_list = []
-    validation_user_list = []
+    training_user_list = Dataset_config.training_user_list
+    validation_user_list = Dataset_config.validation_user_list
+    # training_user_list = []
+    # validation_user_list = []
     testing_user_list = Dataset_config.testing_user_list
     user_list = training_user_list + validation_user_list + testing_user_list
 

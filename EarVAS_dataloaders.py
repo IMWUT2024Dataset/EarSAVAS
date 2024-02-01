@@ -6,9 +6,10 @@ from collections import Counter
 from torch.utils.data import Dataset
 
 class EarSAVAS_Dataset(Dataset):
-    def __init__(self, audio_data, imu_data, user_list, label_dict, audio_conf=None, specaug=False):
+    def __init__(self, audio_data, imu_data, user_list, label_dict, audio_conf=None, specaug=False, samosa=False):
         self.user_list = user_list
         self.label_dict = label_dict
+        self.samosa = samosa
 
         self.audio_data = {user: audio_data[user] for user in self.user_list}
         self.audio_data = {user: {label: self.audio_data[user][label] for label in self.audio_data[user] if label in label_dict.keys() or label == 'Cough'} for user in self.audio_data}
@@ -104,7 +105,6 @@ class EarSAVAS_Dataset(Dataset):
         mixed_data, label = self.final_data[index]
         audio_data, imu_data = mixed_data
         imu_data = imu_data.astype(np.float32)
-        imu_data = imu_data[-6:]
 
         others_index = self.label_list.index('others')
         valid_label_length = others_index + 1
@@ -117,31 +117,34 @@ class EarSAVAS_Dataset(Dataset):
         else:
             label_indices[self.label_dict[label]] = 1.0
             
-        fbank1, fbank2 = self._wav2fbank(audio_data, 16000)        
-        label_indices = torch.FloatTensor(label_indices)
+        if not self.samosa:
+            fbank1, fbank2 = self._wav2fbank(audio_data, 16000)
+            label_indices = torch.FloatTensor(label_indices)
 
-        if self.specaug == True:
-            freqm = torchaudio.transforms.FrequencyMasking(self.freqm)
-            timem = torchaudio.transforms.TimeMasking(self.timem)
-            fbank1 = torch.transpose(fbank1, 0, 1)
-            fbank1 = fbank1.unsqueeze(0)
-            fbank1 = freqm(fbank1)
-            fbank1 = timem(fbank1)
-            fbank1 = fbank1.squeeze(0)
-            fbank1 = torch.transpose(fbank1, 0, 1)
+            if self.specaug == True:
+                freqm = torchaudio.transforms.FrequencyMasking(self.freqm)
+                timem = torchaudio.transforms.TimeMasking(self.timem)
+                fbank1 = torch.transpose(fbank1, 0, 1)
+                fbank1 = fbank1.unsqueeze(0)
+                fbank1 = freqm(fbank1)
+                fbank1 = timem(fbank1)
+                fbank1 = fbank1.squeeze(0)
+                fbank1 = torch.transpose(fbank1, 0, 1)
 
-            fbank2 = torch.transpose(fbank2, 0, 1)
-            fbank2 = fbank2.unsqueeze(0)
-            fbank2 = freqm(fbank2)
-            fbank2 = timem(fbank2)
-            fbank2 = fbank2.squeeze(0)
-            fbank2 = torch.transpose(fbank2, 0, 1)
+                fbank2 = torch.transpose(fbank2, 0, 1)
+                fbank2 = fbank2.unsqueeze(0)
+                fbank2 = freqm(fbank2)
+                fbank2 = timem(fbank2)
+                fbank2 = fbank2.squeeze(0)
+                fbank2 = torch.transpose(fbank2, 0, 1)
 
-        fbank = torch.stack((fbank1, fbank2), dim=0)
-        fbank = (fbank + 3.05) / 5.42
+            fbank = torch.stack((fbank1, fbank2), dim=0)
+            fbank = (fbank + 3.05) / 5.42
 
-        if self.mode == 'train':
-            fbank = torch.roll(fbank, np.random.randint(0, 1024), 0)
+            if self.mode == 'train':
+                fbank = torch.roll(fbank, np.random.randint(0, 1024), 0)
+        else:
+            fbank = audio_data
 
         return fbank, imu_data, label_indices, label_raw
 
@@ -249,7 +252,7 @@ class SWITestDataset(Dataset):
         else:
             raise ValueError('task not supported, please check the task name')
 
-        fbank = self._wav2fbank(audio_data, 16000)        
+        fbank = self._wav2fbank(audio_data, 16000)    
         label_indices = torch.FloatTensor(label_indices)
 
         if self.specaug == True:
