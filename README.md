@@ -88,7 +88,7 @@ python3 SAMoSA_data_prepare.py Dataset.dataset_dir=the_dataset_dir_you_set_on_th
 
 
 
-**Step 5.* Run the evaluation of our best models of EarVAS series models.
+**Step 5.** Run the evaluation of our best models of EarVAS series models.
 
 ```
 python3 EarVAS_evaluation.py Dataset.dataset_dir=absolute_path_of_where_you_store_dataset_files_in_step_2 Model.exp_dir=absolute_path_where_you_download_the_pretrained_models Model.task=$task Model.device=$device Model.samosa=True/False
