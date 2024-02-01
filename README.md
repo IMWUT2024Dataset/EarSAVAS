@@ -76,7 +76,7 @@ python3 prep_data.py Dataset.raw_data_dir=absolute_path_of_data Dataset.dataset_
 
 
 
-**Step 3. **Prepare the data for SAMoSA evaluation.
+**Step 3.** Prepare the data for SAMoSA evaluation.
 
 ```
 python3 SAMoSA_data_prepare.py Dataset.dataset_dir=the_dataset_dir_you_set_on_the_step2
